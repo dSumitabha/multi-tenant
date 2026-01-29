@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import { cookies } from "next/headers";
 
 import { getMasterConnection } from "@/lib/db/masterDbConnect";
 import { getUserModel } from "@/models/User";
@@ -20,18 +21,20 @@ export async function POST(req) {
         const User = getUserModel(conn);
 
         const user = await User.findOne({ email, isActive: true }).lean();
+
         if (!user) {
             return NextResponse.json(
-            { error: "Invalid credentials" },
-            { status: 401 }
+                { error: "Email is not registered." },
+                { status: 404 }
             );
         }
 
         const isValid = await bcrypt.compare(password, user.passwordHash);
+
         if (!isValid) {
             return NextResponse.json(
-            { error: "Invalid credentials" },
-            { status: 401 }
+                { error: "Incorrect password." },
+                { status: 401 }
             );
         }
 
@@ -39,6 +42,16 @@ export async function POST(req) {
             userId: user._id.toString(),
             tenantId: user.tenantId.toString(),
             role: user.role,
+        });
+
+        const cookieStore = await cookies();
+
+        cookieStore.set("auth_token", token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "lax",
+            path: "/",
+            maxAge: 60 * 60 * 24 // 24 hours
         });
 
         return NextResponse.json({
@@ -52,7 +65,7 @@ export async function POST(req) {
     } catch (err) {
         console.error(err);
         return NextResponse.json(
-            { error: "Internal server error" },
+            { error: "Internal server error! Please try again." },
             { status: 500 }
         );
     }
