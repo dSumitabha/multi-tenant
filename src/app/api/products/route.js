@@ -20,7 +20,10 @@ export async function POST(req) {
             );
         }
 
-        const tenantConn = await getTenantConnection(tenantId);
+        const { dbName } = await resolveTenant(tenantId);
+
+        const tenantConn = await getTenantConnection(dbName);
+
         const Product = getProductModel(tenantConn);
 
         const product = await Product.create({
