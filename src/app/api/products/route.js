@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth/requireAuth";
 import { requireRole } from "@/lib/auth/requireRole";
-import { getTenantConnection } from "@/lib/db";
-import { getProductModel } from "@/models/Product.model";
+import { getTenantConnection } from "@/lib/db/tenantDbConnect";
+import { getProductModel } from "@/models/Product";
+import { resolveTenant } from "@/lib/tenant/resolveTenant";
 
 export async function POST(req) {
     try {
@@ -49,7 +50,9 @@ export async function GET() {
 
         requireRole(role, ["owner", "manager", "staff"]);
 
-        const tenantConn = await getTenantConnection(tenantId);
+        const { dbName } = await resolveTenant(tenantId);
+
+        const tenantConn = await getTenantConnection(dbName);
         const Product = getProductModel(tenantConn);
 
         const products = await Product.find({ isActive: true }).lean();
@@ -61,8 +64,9 @@ export async function GET() {
         }
 
         return NextResponse.json(
-            { error: "Failed to fetch products" },
+            { error : err.message},
+            { message : "Failed to fetch products" },
             { status: 500 }
         );
     }
-}  
+}
