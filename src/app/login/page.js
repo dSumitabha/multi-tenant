@@ -16,7 +16,6 @@ export default function LoginPage() {
         const email = formData.get('email');
         const password = formData.get('password');
 
-        // We wrap the fetch in a promise so Sonner can track the state
         const loginPromise = fetch('/api/auth/login', {
             method: 'POST',
             body: JSON.stringify({ email, password }),
@@ -24,9 +23,6 @@ export default function LoginPage() {
         }).then(async (res) => {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Login failed');
-            
-            // Handle successful login (e.g., store token in cookie/localStorage)
-            // localStorage.setItem('token', data.token); 
             
             router.push('/');
             return data;

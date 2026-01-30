@@ -1,54 +1,55 @@
 const users = [
-    // TENANT: northwind
+    // TENANT: apex
     {
-        tenantSlug: "northwind",
-        name: "Northwind Owner One",
-        email: "northwind.owner1@mail.com",
+        tenantSlug: "apex",
+        name: "Alice Apex",
+        email: "owner@apex.com",
         password: "12345678",
         role: "owner",
         isActive: true,
     },
     {
-        tenantSlug: "northwind",
-        name: "Northwind Owner Two",
-        email: "northwind.owner2@mail.com",
+        tenantSlug: "apex",
+        name: "Mark Manager",
+        email: "manager@apex.com",
         password: "12345678",
-        role: "owner",
+        role: "manager",
         isActive: true,
     },
     {
-        tenantSlug: "northwind",
-        name: "Northwind Owner Three",
-        email: "northwind.owner3@mail.com",
+        tenantSlug: "apex",
+        name: "Sam Staff",
+        email: "staff@apex.com",
         password: "12345678",
-        role: "owner",
+        role: "staff",
         isActive: true,
     },
 
-    // TENANT: globex
+    // TENANT: nexus
     {
-        tenantSlug: "globex",
-        name: "Globex Owner One",
-        email: "globex.owner1@mail.com",
+        tenantSlug: "nexus",
+        name: "Nathan Nexus",
+        email: "owner@nexus.com",
         password: "12345678",
         role: "owner",
         isActive: true,
     },
     {
-        tenantSlug: "globex",
-        name: "Globex Owner Two",
-        email: "globex.owner2@mail.com",
+        tenantSlug: "nexus",
+        name: "Mindy Manager",
+        email: "manager@nexus.com",
         password: "12345678",
-        role: "owner",
+        role: "manager",
         isActive: true,
     },
     {
-        tenantSlug: "globex",
-        name: "Globex Owner Three",
-        email: "globex.owner3@mail.com",
+        tenantSlug: "nexus",
+        name: "Steven Staff",
+        email: "staff@nexus.com",
         password: "12345678",
-        role: "owner",
+        role: "staff",
         isActive: true,
     },
 ];
-export default users;  
+
+export default users;

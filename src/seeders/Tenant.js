@@ -1,16 +1,16 @@
 const tenants = [
     {
-        name: "Northwind Traders",
-        slug: "northwind",
-        dbName: "tenant_northwind",
+        name: "Apex Solutions",
+        slug: "apex",
+        dbName: "tenant_apex",
         status: "active",
     },
     {
-        name: "Globex Corporation",
-        slug: "globex",
-        dbName: "tenant_globex",
+        name: "Nexus Labs",
+        slug: "nexus",
+        dbName: "tenant_nexus",
         status: "active",
     },
 ];
-  
+
 export default tenants;
