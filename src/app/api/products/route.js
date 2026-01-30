@@ -1,0 +1,68 @@
+import { NextResponse } from "next/server";
+import { requireAuth } from "@/lib/auth/requireAuth";
+import { requireRole } from "@/lib/auth/requireRole";
+import { getTenantConnection } from "@/lib/db";
+import { getProductModel } from "@/models/Product.model";
+
+export async function POST(req) {
+    try {
+        const { userId, tenantId, role } = await requireAuth();
+
+        requireRole(role, ["owner"]);
+
+        const payload = await req.json();
+
+        if (!payload?.name || !payload?.variants?.length) {
+            return NextResponse.json(
+                { error: "Product name and variants are required" },
+                { status: 400 }
+            );
+        }
+
+        const tenantConn = await getTenantConnection(tenantId);
+        const Product = getProductModel(tenantConn);
+
+        const product = await Product.create({
+            ...payload,
+            createdBy: userId,
+        });
+
+        return NextResponse.json(product, { status: 201 });
+    } catch (err) {
+        if (err.status === 403) {
+            return NextResponse.json(
+                { error: "Forbidden" },
+                { status: 403 }
+            );
+        }
+
+        return NextResponse.json(
+            { error: "Failed to create product" },
+            { status: 500 }
+        );
+    }
+}
+
+export async function GET() {
+    try {
+        const { tenantId, role } = await requireAuth();
+
+        requireRole(role, ["owner", "manager", "staff"]);
+
+        const tenantConn = await getTenantConnection(tenantId);
+        const Product = getProductModel(tenantConn);
+
+        const products = await Product.find({ isActive: true }).lean();
+
+        return NextResponse.json(products);
+    } catch (err) {
+        if (err.status === 403) {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
+
+        return NextResponse.json(
+            { error: "Failed to fetch products" },
+            { status: 500 }
+        );
+    }
+}  
