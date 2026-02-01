@@ -51,27 +51,59 @@ export default function SalesOrderIndexPage() {
         fetchOrders();
     }, []);    
 
-    const handleNextStatus = (order) => {
+    async function handleNextStatus(orderId) {
+        if (updatingId) return;
+    
+        const order = orders.find(o => o._id === orderId);
+        if (!order) return;
+    
         const nextStatus = STATUS_FLOW?.[order?.status];
-
         if (!nextStatus) {
             toast.warning("No further status transition allowed.");
             return;
         }
-
-        toast.info(`Will move status from ${order?.status} → ${nextStatus}`);
-        setUpdatingId(order?._id);
-
-        // UI-only simulation
-        setTimeout(() => {
+    
+        try {
+            setUpdatingId(orderId);
+    
+            const res = await fetch(`/api/sales-orders/${orderId}/status`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ action: "NEXT" })
+            });
+    
+            const data = await res.json();
+    
+            if (res.status === 401) {
+                toast.error("Session expired. Please login again.");
+                return;
+            }
+    
+            if (res.status === 403) {
+                toast.error("You don’t have permission to update this order.");
+                return;
+            }
+    
+            if (!res.ok) {
+                toast.error(data.error || "Failed to update order status.");
+                return;
+            }
+    
+            // Optimistic local update
             setOrders(prev =>
                 prev.map(o =>
-                    o?._id === order?._id ? { ...o, status: nextStatus } : o
+                    o._id === orderId ? { ...o, status: data.status } : o
                 )
             );
+    
+            toast.success(`Order status updated to ${data.status}`);
+        } catch (err) {
+            console.error("Status update error:", err);
+            toast.error("Network error while updating order status.");
+        } finally {
             setUpdatingId(null);
-        }, 500);
-    };
+        }
+    }    
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-8 transition-colors">
@@ -190,8 +222,8 @@ export default function SalesOrderIndexPage() {
 
                                         <td className="px-6 py-4 text-right">
                                             <button
-                                                disabled={!nextStatus || updatingId === order?._id}
-                                                onClick={() => handleNextStatus(order)}
+                                                disabled={!STATUS_FLOW?.[order?.status] || updatingId === order?._id}
+                                                onClick={() => handleNextStatus(order._id)}
                                                 className="inline-flex items-center justify-center px-4 py-2 text-xs font-bold rounded-md
                                                     bg-slate-900 dark:bg-slate-100
                                                     text-white dark:text-slate-900
@@ -200,8 +232,8 @@ export default function SalesOrderIndexPage() {
                                             >
                                                 {updatingId === order?._id
                                                     ? "Updating…"
-                                                    : nextStatus
-                                                        ? `Mark as ${nextStatus}`
+                                                    : STATUS_FLOW?.[order?.status]
+                                                        ? `Mark as ${STATUS_FLOW[order?.status]}`
                                                         : "Completed"}
                                             </button>
                                         </td>
