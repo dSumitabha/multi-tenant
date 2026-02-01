@@ -10,7 +10,7 @@ export default function PurchaseOrdersPage() {
     useEffect(() => {
         async function fetchPOs() {
             try {
-                const res = await fetch("/api/purchase-order");
+                const res = await fetch("/api/purchase-orders");
 
                 if (res.status === 401) {
                     toast.error("Session expired. Please login again.");

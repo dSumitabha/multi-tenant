@@ -24,7 +24,7 @@ export default function CreatePOPage() {
         }
     
         try {
-            const response = await fetch("/api/purchase-order", {
+            const response = await fetch("/api/purchase-orders", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
