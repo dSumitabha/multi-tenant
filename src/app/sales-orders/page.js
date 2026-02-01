@@ -27,7 +27,7 @@ export default function SalesOrderIndexPage() {
                 }
 
                 if (res.status === 403) {
-                    toast.error("Unauthorized. Please log in.");
+                    toast.error("Unauthorized. Log in with authorized credentials.");
                     setOrders([]);
                     return;
                 }
