@@ -69,13 +69,38 @@ export default function CreatePOPage() {
     };
 
     useEffect(() => {
+        const handleFetch = async (url) => {
+            const res = await fetch(url);
+            // Return both the data and the status so we can check it later
+            return {
+                data: res.ok ? await res.json() : [],
+                status: res.status
+            };
+        };
+    
         Promise.all([
-            fetch("/api/suppliers").then(res => res.json()),
-            fetch("/api/products").then(res => res.json())
-        ]).then(([suppliers, products]) => {
-            setSuppliers(suppliers);
-            setProducts(products);
-        }).catch(err => console.error("Fetch error:", err));
+            handleFetch("/api/suppliers"),
+            handleFetch("/api/products")
+        ]).then(([supRes, prodRes]) => {
+            // 1. Handle specialized errors once
+            if (supRes.status === 401 || prodRes.status === 401) {
+                toast.error("Session expired. Please log in again.");
+            } else if (supRes.status === 403 || prodRes.status === 403) {
+                toast.error("You don't have permission to view this data.");
+            } else if (!supRes.ok || !prodRes.ok) {
+                // Optional: catch-all for other 400/500 errors
+                toast.warning("Some data failed to load.");
+            }
+    
+            // 2. Set the data (fallback to empty array is handled in handleFetch)
+            setSuppliers(Array.isArray(supRes.data) ? supRes.data : []);
+            setProducts(Array.isArray(prodRes.data) ? prodRes.data : []);
+        }).catch(err => {
+            console.error("Fetch error:", err);
+            toast.error("Network error. Please check your connection.");
+            setSuppliers([]);
+            setProducts([]);
+        });
     }, []);
 
     const addItem = () => setItems([
@@ -126,7 +151,7 @@ export default function CreatePOPage() {
                         required
                     >
                         <option value="" className="bg-white dark:bg-slate-900 text-slate-500">Select a supplier</option>
-                        {suppliers.map(s => (
+                        {suppliers?.map(s => (
                             <option key={s._id} value={s._id} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
                                 {s.name}
                             </option>
@@ -162,7 +187,7 @@ export default function CreatePOPage() {
                                             onChange={e => updateItem(index, "productId", e.target.value)}
                                         >
                                             <option value="" className="bg-white dark:bg-slate-900">Choose Product</option>
-                                            {products.map(p => (
+                                            {products?.map(p => (
                                                 <option key={p._id} value={p._id} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">{p.name}</option>
                                             ))}
                                         </select>
