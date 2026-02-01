@@ -37,7 +37,7 @@ const SalesOrderSchema = new mongoose.Schema(
         },
         status: {
             type: String,
-            enum: ["DRAFT", "CONFIRMED", "FULFILLED", "CANCELLED"],
+            enum: ["DRAFT", "CONFIRMED", "FULFILLED", "RETURNED"],
             default: "DRAFT"
         },
         items: {
