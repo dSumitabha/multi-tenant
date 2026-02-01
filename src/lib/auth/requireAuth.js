@@ -6,7 +6,9 @@ export async function requireAuth() {
     const token = cookieStore.get("auth_token")?.value;
 
     if (!token) {
-        throw new Error("UNAUTHORIZED");        
+        const err = new Error("UNAUTHORIZED");
+        err.status = 401;
+        throw err;
     }
 
     try {
@@ -17,7 +19,9 @@ export async function requireAuth() {
             tenantId: payload.tenantId,
             role: payload.role,
         };
-    } catch (err) {
-        throw new Error("INVALID_TOKEN");
+    } catch {
+        const err = new Error("INVALID_TOKEN");
+        err.status = 401;
+        throw err;
     }
 }

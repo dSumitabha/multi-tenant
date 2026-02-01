@@ -54,22 +54,22 @@ export async function GET() {
         requireRole(role, ["owner", "manager", "staff"]);
 
         const { dbName } = await resolveTenant(tenantId);
-
+        
         const tenantConn = await getTenantConnection(dbName);
         const Product = getProductModel(tenantConn);
 
         const products = await Product.find({ isActive: true }).lean();
 
-        return NextResponse.json(products);
+        return NextResponse.json(products, { status: 200 });
+
     } catch (err) {
-        if (err.status === 403) {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-        }
+        const status = err.status || 500;
 
         return NextResponse.json(
-            { error : err.message},
-            { message : "Failed to fetch products" },
-            { status: 500 }
+            {
+                error: err.message || "INTERNAL_ERROR",
+            },
+            { status }
         );
     }
 }
