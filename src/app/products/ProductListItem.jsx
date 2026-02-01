@@ -1,6 +1,13 @@
-export default function ProductListItem({ product }) {
-    const totalStock = product.variants?.reduce(
-        (sum, v) => sum + (v.stock || 0),
+export default function ProductListItem({ product = {} }) {
+    const {
+        name = "Unnamed product",
+        variants = [],
+    } = product ?? {};
+
+    const safeVariants = Array.isArray(variants) ? variants : [];
+
+    const totalStock = safeVariants.reduce(
+        (sum, v) => sum + (Number(v?.stock) || 0),
         0
     );
 
@@ -9,11 +16,11 @@ export default function ProductListItem({ product }) {
             <div className="flex justify-between items-center">
                 <div>
                     <h2 className="text-lg font-medium text-white">
-                        {product.name}
+                        {name}
                     </h2>
 
                     <p className="text-sm text-gray-400">
-                        {product.variants.length} variants
+                        {safeVariants.length} variants
                     </p>
                 </div>
 
