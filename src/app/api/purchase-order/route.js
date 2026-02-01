@@ -56,8 +56,8 @@ export async function POST(req) {
         });
     } catch (err) {
         return NextResponse.json(
-            { error: "Failed to create purchase order" },
-            { status: 500 }
+            { error: err.message || "Failed to create purchase order" },
+            { status: err.status || 500 }
         );
-    }
+    }    
 }

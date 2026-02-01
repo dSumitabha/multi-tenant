@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function CreatePOPage() {
     const [suppliers, setSuppliers] = useState([]);
@@ -8,6 +9,60 @@ export default function CreatePOPage() {
     const [supplierId, setSupplierId] = useState("");
     const [items, setItems] = useState([]);
     
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+    
+        const isInvalid = items.some(
+            item => !item.productId || !item.variantId || item.orderedQty <= 0
+        );
+    
+        if (isInvalid) {
+            toast.warning("Please complete all item fields with valid quantities.");
+            return;
+        }
+    
+        try {
+            const response = await fetch("/api/purchase-order", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    supplierId,
+                    items,
+                }),
+            });
+    
+            const data = await response.json();
+    
+            if (response.ok) {
+                toast.success("Purchase Order created successfully");
+                return;
+            }
+    
+            // Role / auth aware errors
+            if (response.status === 403) {
+                toast.error("You are not authorized to create purchase orders.");
+                return;
+            }
+    
+            if (response.status === 401) {
+                toast.error("Your session has expired. Please log in again.");
+                return;
+            }
+    
+            if (response.status === 400) {
+                toast.warning(data.error || "Invalid purchase order data.");
+                return;
+            }
+    
+            toast.error(data.error || "Failed to create purchase order.");
+        } catch (err) {
+            console.error("Submission error:", err);
+            toast.error("Network error. Please check your connection.");
+        }
+    };    
+
     useEffect(() => {
         Promise.all([
             fetch("/api/suppliers").then(res => res.json()),
@@ -19,7 +74,11 @@ export default function CreatePOPage() {
         }).catch(err => console.error("Fetch error:", err));
     }, []);
 
-    const addItem = () => setItems([...items, { productId: "", variantId: "", orderedQty: 1, unitPrice: "" }]);
+    const addItem = () => setItems([
+        ...items, 
+        { productId: "", variantId: "", orderedQty: 1, unitPrice: 0 }
+    ]);
+
     const removeItem = (index) => setItems(items.filter((_, i) => i !== index));
 
     const updateItem = (index, field, value) => {
@@ -45,7 +104,7 @@ export default function CreatePOPage() {
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-8 transition-colors">
 
-            <form className="max-w-4xl mx-auto space-y-6" >
+            <form className="max-w-4xl mx-auto space-y-6" onSubmit={handleSubmit}>
                 <header className="mb-10">
                     <h1 className="text-2xl font-bold tracking-tight">Create Purchase Order</h1>
                     <p className="text-slate-500 dark:text-slate-400 text-sm">Fill in the details to generate a new PO.</p>
