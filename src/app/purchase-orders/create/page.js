@@ -9,7 +9,6 @@ export default function CreatePOPage() {
     const [items, setItems] = useState([]);
     
     useEffect(() => {
-        // Mocking/Fetching logic remains the same
         Promise.all([
             fetch("/api/suppliers").then(res => res.json()),
             fetch("/api/products").then(res => res.json())
@@ -22,8 +21,25 @@ export default function CreatePOPage() {
 
     const addItem = () => setItems([...items, { productId: "", variantId: "", orderedQty: 1, unitPrice: "" }]);
     const removeItem = (index) => setItems(items.filter((_, i) => i !== index));
+
     const updateItem = (index, field, value) => {
-        setItems(items.map((item, i) => i === index ? { ...item, [field]: value } : item));
+        setItems(items.map((item, i) => {
+            if (i === index) {
+                const updatedItem = { ...item, [field]: value };
+    
+                // Logic to auto-populate price on variant change
+                if (field === "variantId") {
+                    const product = products.find(p => p._id === item.productId);
+                    const variant = product?.variants.find(v => v._id === value);
+                    if (variant) {
+                        updatedItem.unitPrice = variant.price;
+                    }
+                }
+    
+                return updatedItem;
+            }
+            return item;
+        }));
     };
 
     return (
@@ -118,10 +134,11 @@ export default function CreatePOPage() {
                                         <label className="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Price</label>
                                         <input
                                             type="number"
-                                            className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-md px-3 py-3 text-sm focus:border-blue-500 outline-none  appearance-none"
+                                            className="w-full bg-slate-100 dark:bg-slate-800/50 border border-slate-300 dark:border-slate-700 rounded-md px-3 py-3 text-sm outline-none cursor-not-allowed text-slate-500"
                                             placeholder="0.00"
                                             value={item.unitPrice}
-                                            onChange={e => updateItem(index, "unitPrice", e.target.value)}
+                                            readOnly
+                                            tabIndex="-1"
                                         />
                                     </div>
 
