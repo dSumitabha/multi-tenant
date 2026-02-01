@@ -3,9 +3,17 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+const NEXT_ACTION_LABEL = {
+    DRAFT: "Mark as Sent",
+    SENT: "Confirm Order",
+    CONFIRMED: "Mark as Received"
+};
+
+
 export default function PurchaseOrdersPage() {
     const [loading, setLoading] = useState(true);
     const [purchaseOrders, setPurchaseOrders] = useState([]);
+    const [updatingId, setUpdatingId] = useState(null);
 
     useEffect(() => {
         async function fetchPOs() {
@@ -39,6 +47,54 @@ export default function PurchaseOrdersPage() {
 
         fetchPOs();
     }, []);
+
+    async function handleNextStatus(poId) {
+        if (updatingId) return;
+    
+        try {
+            setUpdatingId(poId);
+    
+            const res = await fetch(`/api/purchase-orders/${poId}/status`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ action: "NEXT" })
+            });
+    
+            const data = await res.json();
+    
+            if (res.status === 401) {
+                toast.error("Session expired. Please login again.");
+                return;
+            }
+    
+            if (res.status === 403) {
+                toast.error("You don’t have permission to update this order.");
+                return;
+            }
+    
+            if (!res.ok) {
+                toast.error(data.error || "Failed to update status");
+                return;
+            }
+    
+            // 🔁 optimistic local update
+            setPurchaseOrders(prev =>
+                prev.map(po =>
+                    po._id === poId
+                        ? { ...po, status: data.status }
+                        : po
+                )
+            );
+    
+            toast.success(`Order status updated to ${data.status}`);
+        } catch {
+            toast.error("Network error while updating status");
+        } finally {
+            setUpdatingId(null);
+        }
+    }    
 
     return (
         <div className="p-6">
@@ -134,14 +190,39 @@ export default function PurchaseOrdersPage() {
                             </div>
 
                             {/* Footer */}
-                            <div className="flex justify-between items-center px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
-                                <p className="text-sm text-slate-500 dark:text-slate-400">
-                                    {po.itemCount} item{po.itemCount > 1 ? "s" : ""}
-                                </p>
-                                <p className="text-lg font-semibold text-slate-800 dark:text-slate-100">
-                                    ₹{po.totalAmount}
-                                </p>
-                            </div>
+{/* Footer */}
+<div className="flex justify-between items-center px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
+    <p className="text-sm text-slate-500 dark:text-slate-400">
+        {po.itemCount} item{po.itemCount > 1 ? "s" : ""}
+    </p>
+
+    <div className="flex items-center gap-4">
+        <p className="text-lg font-semibold text-slate-800 dark:text-slate-100">
+            ₹{po.totalAmount}
+        </p>
+
+        {NEXT_ACTION_LABEL[po.status] && (
+            <button
+                onClick={() => handleNextStatus(po._id)}
+                disabled={updatingId === po._id}
+                className={`
+                    rounded-lg px-4 py-2 text-sm font-medium
+                    transition
+                    ${
+                        updatingId === po._id
+                            ? "cursor-not-allowed bg-slate-300 text-slate-600 dark:bg-slate-700 dark:text-slate-400"
+                            : "bg-slate-900 text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200"
+                    }
+                `}
+            >
+                {updatingId === po._id
+                    ? "Updating…"
+                    : NEXT_ACTION_LABEL[po.status]}
+            </button>
+        )}
+    </div>
+</div>
+
                         </div>
                     ))}
                 </div>

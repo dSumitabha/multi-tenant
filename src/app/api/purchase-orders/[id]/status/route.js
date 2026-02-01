@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import mongoose from "mongoose";
 
 import { requireAuth } from "@/lib/auth/requireAuth";
 import { requireRole } from "@/lib/auth/requireRole";
@@ -16,14 +15,13 @@ const STATUS_FLOW = {
 };
 
 export async function PATCH(req, { params }) {
-    const session = await mongoose.startSession();
-    session.startTransaction();
+    let session;
 
     try {
         const { tenantId, role } = await requireAuth();
         requireRole(role, ["owner", "manager"]);
 
-        const { id } = params;
+        const { id } = await params;
         const body = await req.json();
 
         if (body.action !== "NEXT") {
@@ -35,6 +33,8 @@ export async function PATCH(req, { params }) {
 
         const { dbName } = await resolveTenant(tenantId);
         const tenantConn = await getTenantConnection(dbName);
+        session = await tenantConn.startSession();
+        session.startTransaction();
 
         const PurchaseOrder = getPurchaseOrderModel(tenantConn);
 
@@ -84,12 +84,14 @@ export async function PATCH(req, { params }) {
             status: po.status
         });
     } catch (err) {
-        await session.abortTransaction();
-        session.endSession();
-
+        if (session) {
+            await session.abortTransaction();
+            session.endSession();
+        }
+    
         return NextResponse.json(
             { error: err.message || "Failed to update PO status" },
             { status: err.status || 500 }
         );
-    }
+    }    
 }

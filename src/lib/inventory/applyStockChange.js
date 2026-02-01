@@ -1,3 +1,8 @@
+import mongoose from "mongoose";
+import { getProductModel } from "@/models/Product";
+import StockMovementSchema from "@/models/StockMovementSchema";
+import StockSnapshotSchema from "@/models/StockSnapshotSchema";
+
 export async function applyStockChange({
     tenantConn,
     productId,
@@ -10,8 +15,14 @@ export async function applyStockChange({
     idempotencyKey = null
 }) {
     const Product = getProductModel(tenantConn);
-    const StockMovement = getStockMovementModel(tenantConn);
-    const StockSnapshot = getStockSnapshotModel(tenantConn);
+
+    const StockMovement =
+        tenantConn.models.StockMovement ||
+        tenantConn.model("StockMovement", StockMovementSchema);
+
+    const StockSnapshot =
+        tenantConn.models.StockSnapshot ||
+        tenantConn.model("StockSnapshot", StockSnapshotSchema);
 
     if (idempotencyKey) {
         const existing = await StockMovement.findOne({ idempotencyKey });
