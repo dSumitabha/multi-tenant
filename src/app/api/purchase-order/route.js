@@ -61,3 +61,125 @@ export async function POST(req) {
         );
     }    
 }
+
+export async function GET(req) {
+    try {
+        const { tenantId, role } = await requireAuth();
+        requireRole(role, ["owner", "manager", "staff"]);
+
+        const { searchParams } = new URL(req.url);
+        const status = searchParams.get("status");
+
+        const { dbName } = await resolveTenant(tenantId);
+        const tenantConn = await getTenantConnection(dbName);
+
+        const PurchaseOrder = getPurchaseOrderModel(tenantConn);
+
+        const matchStage = {};
+        if (status) matchStage.status = status;
+
+        const pipeline = [
+            { $match: matchStage },
+
+            /* ---- supplier join ---- */
+            {
+                $lookup: {
+                    from: "suppliers",
+                    localField: "supplierId",
+                    foreignField: "_id",
+                    as: "supplier"
+                }
+            },
+            { $unwind: "$supplier" },
+
+            /* ---- unwind items ---- */
+            { $unwind: "$items" },
+
+            /* ---- product join ---- */
+            {
+                $lookup: {
+                    from: "products",
+                    localField: "items.productId",
+                    foreignField: "_id",
+                    as: "product"
+                }
+            },
+            { $unwind: "$product" },
+
+            /* ---- extract correct variant ---- */
+            {
+                $addFields: {
+                    variant: {
+                        $first: {
+                            $filter: {
+                                input: "$product.variants",
+                                as: "variant",
+                                cond: {
+                                    $eq: ["$$variant._id", "$items.variantId"]
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+
+            /* ---- group back to PO ---- */
+            {
+                $group: {
+                    _id: "$_id",
+                    status: { $first: "$status" },
+                    createdAt: { $first: "$createdAt" },
+                    supplier: {
+                        $first: {
+                            _id: "$supplier._id",
+                            name: "$supplier.name"
+                        }
+                    },
+                    items: {
+                        $push: {
+                            product: {
+                                _id: "$product._id",
+                                name: "$product.name"
+                            },
+                            variant: {
+                                _id: "$variant._id",
+                                sku: "$variant.sku",
+                                attributes: "$variant.attributes"
+                            },
+                            orderedQty: "$items.orderedQty",
+                            unitPrice: "$items.unitPrice",
+                            lineTotal: {
+                                $multiply: [
+                                    "$items.orderedQty",
+                                    "$items.unitPrice"
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+
+            /* ---- derived fields ---- */
+            {
+                $addFields: {
+                    itemCount: { $size: "$items" },
+                    totalAmount: { $sum: "$items.lineTotal" }
+                }
+            },
+
+            { $sort: { createdAt: -1 } }
+        ];
+
+        const data = await PurchaseOrder.aggregate(pipeline);
+
+        return NextResponse.json({
+            success: true,
+            data
+        });
+    } catch (err) {
+        return NextResponse.json(
+            { error: err.message || "Failed to fetch purchase orders" },
+            { status: err.status || 500 }
+        );
+    }
+}
