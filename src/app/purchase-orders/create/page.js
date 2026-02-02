@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import NavBar from '@/components/NavBar'
 
 export default function CreatePOPage() {
     const [suppliers, setSuppliers] = useState([]);
@@ -131,6 +132,8 @@ export default function CreatePOPage() {
     };
 
     return (
+        <>
+        <NavBar/>
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-8 transition-colors">
 
             <form className="max-w-4xl mx-auto space-y-6" onSubmit={handleSubmit}>
@@ -268,5 +271,6 @@ export default function CreatePOPage() {
                 </div>
             </form>
         </div>
+        </>
     );
 }

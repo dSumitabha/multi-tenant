@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import NavBar from '@/components/NavBar'
 import { toast } from "sonner";
 
 export default function CreateSOPage() {
@@ -101,6 +102,8 @@ export default function CreateSOPage() {
     };
 
     return (
+        <>
+        <NavBar />
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-8 transition-colors">
             <form className="max-w-4xl mx-auto space-y-6" onSubmit={handleSubmit}>
                 <header className="mb-10">
@@ -233,5 +236,6 @@ export default function CreateSOPage() {
                 </div>
             </form>
         </div>
+        </>
     );
 }
