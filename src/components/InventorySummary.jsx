@@ -67,24 +67,36 @@ export default function InventorySummary() {
             <div className="rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden">
                 <table className="w-full text-sm">
                     <thead className="bg-slate-100 dark:bg-slate-800">
-                        <tr>
-                            <th className="px-4 py-3 text-left font-medium">
+                        <tr className="text-xs font-semibold uppercase tracking-wide text-slate-600 dark:text-slate-300">
+                            <th className="px-3 py-2 text-left w-fit whitespace-nowrap">
                                 Product
                             </th>
-                            <th className="px-4 py-3 text-left font-medium">
+                            <th className="px-3 py-2 text-left w-fit whitespace-nowrap">
                                 SKU
                             </th>
-                            <th className="px-4 py-3 text-right font-medium">
-                                Available
+
+                            <th className="px-2 py-2 text-right w-fit whitespace-normal break-words leading-tight">
+                                Available Stock
                             </th>
-                            <th className="px-4 py-3 text-right font-medium">
+
+                            <th className="px-2 py-2 text-right w-fit whitespace-normal break-words leading-tight">
+                                Incoming Stock
+                            </th>
+
+                            <th className="px-2 py-2 text-right w-fit whitespace-normal break-words leading-tight">
+                                Reserved Stock
+                            </th>
+
+                            <th className="px-2 py-2 text-right w-fit whitespace-normal break-words leading-tight">
                                 Unit Price
                             </th>
-                            <th className="px-4 py-3 text-right font-medium">
+
+                            <th className="px-2 py-2 text-right w-fit whitespace-normal break-words leading-tight">
                                 Inventory Value
                             </th>
                         </tr>
                     </thead>
+
                     <tbody>
                         {items.length === 0 && (
                             <tr>
@@ -108,8 +120,14 @@ export default function InventorySummary() {
                                 <td className="px-4 py-3 text-slate-500 dark:text-slate-400">
                                     {item?.sku ?? "—"}
                                 </td>
-                                <td className="px-4 py-3 text-right">
+                                <td className="px-4 py-3 text-center">
                                     {item?.availableQty ?? 0}
+                                </td>
+                                <td className="px-4 py-3 text-center">
+                                    {item?.pendingPOQty ?? 0}
+                                </td>
+                                <td className="px-4 py-3 text-center">
+                                    {item?.pendingSOQty ?? 0}
                                 </td>
                                 <td className="px-4 py-3 text-right">
                                     ₹{item?.unitPrice ?? 0}
