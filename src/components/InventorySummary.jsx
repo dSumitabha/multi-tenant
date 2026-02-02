@@ -109,34 +109,44 @@ export default function InventorySummary() {
                             </tr>
                         )}
 
-                        {items.map((item, index) => (
-                            <tr
-                                key={item?.variantId ?? index}
-                                className="border-t border-slate-200 dark:border-slate-800"
-                            >
-                                <td className="px-4 py-3">
-                                    {item?.productName ?? "—"}
-                                </td>
-                                <td className="px-4 py-3 text-slate-500 dark:text-slate-400">
-                                    {item?.sku ?? "—"}
-                                </td>
-                                <td className="px-4 py-3 text-center">
-                                    {item?.availableQty ?? 0}
-                                </td>
-                                <td className="px-4 py-3 text-center">
-                                    {item?.pendingPOQty ?? 0}
-                                </td>
-                                <td className="px-4 py-3 text-center">
-                                    {item?.pendingSOQty ?? 0}
-                                </td>
-                                <td className="px-4 py-3 text-right">
-                                    ₹{item?.unitPrice ?? 0}
-                                </td>
-                                <td className="px-4 py-3 text-right font-medium">
-                                    ₹{item?.inventoryValue ?? 0}
-                                </td>
-                            </tr>
-                        ))}
+                        {items.map((item, index) => {
+                            const totalStock = (item?.availableQty ?? 0) + (item?.pendingPOQty ?? 0);
+                            const isLowStock = totalStock < 50;
+
+                            return (
+                                <tr
+                                    key={item?.variantId ?? index}
+                                    className="border-t border-slate-200 dark:border-slate-800 relative"
+                                >
+                                    <td className="px-4 py-3">{item?.productName ?? "—"}</td>
+
+                                    <td className="px-4 py-3 text-slate-500 dark:text-slate-400">
+                                        {item?.sku ?? "—"}
+                                    </td>
+
+                                    <td
+                                        className={`px-4 py-3 text-center font-semibold ${
+                                            item?.availableQty > 0
+                                                ? "text-green-600 dark:text-green-400"
+                                                : "text-slate-500 dark:text-slate-400"
+                                        }`}
+                                    >
+                                        {item?.availableQty ?? 0}
+                                    </td>
+
+                                    <td className="px-4 py-3 text-center">{item?.pendingPOQty ?? 0}</td>
+                                    <td className="px-4 py-3 text-center">{item?.pendingSOQty ?? 0}</td>
+
+                                    <td className="px-4 py-3 text-right">₹{item?.unitPrice ?? 0}</td>
+
+                                    <td className="px-4 py-3 text-right font-medium flex items-center justify-end space-x-2">
+                                        <span>₹{item?.inventoryValue ?? 0}</span>
+                                        <span className={`w-3 h-3 rounded-full ${isLowStock ? "bg-red-500 animate-pulse" : "invisible"}`} title={isLowStock ? "Low Stock" : ""}></span>
+                                    </td>
+                                </tr>
+                            );
+                        })}
+
                     </tbody>
                 </table>
             </div>
