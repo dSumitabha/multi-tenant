@@ -15,13 +15,33 @@ export async function GET(req) {
         const tenantConn = await getTenantConnection(dbName);
 
         // Dynamic model resolution
-        const StockMovement =
-            tenantConn.models.StockMovement ||
-            tenantConn.model("StockMovement", StockMovementSchema);
-        const Product = tenantConn.models.Product || (await import("@/models/Product")).then(m => m.getProductModel(tenantConn));
-        const SalesOrder = tenantConn.models.SalesOrder || (await import("@/models/SalesOrder")).then(m => m.getSalesOrderModel(tenantConn));
-        const PurchaseOrder = tenantConn.models.PurchaseOrder || (await import("@/models/PurchaseOrder")).then(m => m.getPurchaseOrderModel(tenantConn));
+        let StockMovement = tenantConn.models.StockMovement
+        if(!StockMovement){
+            const module = await import("@/models/StockMovement");
+            StockMovement = module.getStockMovementModel(tenantConn);
+        }
 
+        let Product = tenantConn.models.Product;
+        if (!Product) {
+            const module = await import("@/models/Product");
+            Product = module.getProductModel(tenantConn);
+        }
+        
+        let SalesOrder = tenantConn.models.SalesOrder;
+
+        if(!SalesOrder){
+            const module = await import("@/models/SalesOrder");
+            SalesOrder = module.getSalesOrderModel(tenantConn);
+        }
+
+
+        let PurchaseOrder = tenantConn.models.PurchaseOrder;
+
+        if (!PurchaseOrder) {
+            const module = await import("@/models/PurchaseOrder");
+            PurchaseOrder = module.getPurchaseOrderModel(tenantConn);
+        }
+        
         const url = new URL(req.url);
         const productId = url.searchParams.get("productId");
         const variantId = url.searchParams.get("variantId");
@@ -44,11 +64,24 @@ export async function GET(req) {
 
                 if (m.sourceType === "PO" && m.sourceId) {
                     const po = await PurchaseOrder.findById(m.sourceId).lean();
-                    const supplier = po?.supplierId ? await tenantConn.model("Supplier").findById(po.supplierId).lean() : null;
+                    let Supplier = tenantConn.models.Supplier;
+
+                    if (!Supplier) {
+                        const module = await import("@/models/Supplier");
+                        Supplier = module.getSupplierModel(tenantConn);
+                    }
+                    if (m.sourceType === "PO" && m.sourceId) {
+                        const po = await PurchaseOrder.findById(m.sourceId).lean();
+                    
+                        const supplier = po?.supplierId
+                            ? await Supplier.findById(po.supplierId).lean()
+                            : null;
+                    }
+                    
                     sourceData = {
                         type: "PO",
                         id: m.sourceId,
-                        supplierName: supplier?.name || null,
+                        supplierName: Supplier?.name || null,
                         poStatus: po?.status || null
                     };
                 }
