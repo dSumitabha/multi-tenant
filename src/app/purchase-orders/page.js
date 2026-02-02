@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import NavBar from '@/components/NavBar'
 
@@ -15,6 +16,7 @@ export default function PurchaseOrdersPage() {
     const [loading, setLoading] = useState(true);
     const [purchaseOrders, setPurchaseOrders] = useState([]);
     const [updatingId, setUpdatingId] = useState(null);
+    const router = useRouter();
 
     useEffect(() => {
         async function fetchPOs() {
@@ -80,7 +82,7 @@ export default function PurchaseOrdersPage() {
                 return;
             }
     
-            // 🔁 optimistic local update
+            // optimistic local update
             setPurchaseOrders(prev =>
                 prev.map(po =>
                     po._id === poId
@@ -101,14 +103,24 @@ export default function PurchaseOrdersPage() {
         <>
         <NavBar />
         <div className="p-6">
-            <div className="mb-6">
-                <h1 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">
-                    Purchase Orders
-                </h1>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                    View and manage all purchase orders
-                </p>
-            </div>
+            <header className="flex items-center justify-between mb-6">
+                <div>
+                    <h1 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">
+                        Purchase Orders
+                    </h1>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                        View and manage all purchase orders
+                    </p>
+                </div>
+                <div>
+                    <button
+                        onClick={() => router.push("/purchase-orders/create")}
+                        className="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-md shadow-sm hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-colors"
+                    >
+                        Create
+                    </button>
+                </div>
+            </header>
 
             {loading ? (
                 <div className="text-slate-500 dark:text-slate-400">

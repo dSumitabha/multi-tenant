@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import NavBar from '@/components/NavBar'
 
@@ -14,6 +15,7 @@ export default function SalesOrderIndexPage() {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [updatingId, setUpdatingId] = useState(null);
+    const router = useRouter();
 
     useEffect(() => {
         const fetchOrders = async () => {
@@ -111,12 +113,24 @@ export default function SalesOrderIndexPage() {
         <NavBar />
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-8 transition-colors">
             <div className="max-w-6xl mx-auto space-y-6">
-                <header>
-                    <h1 className="text-2xl font-bold tracking-tight">Sales Orders</h1>
+            <header className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-2xl font-bold tracking-tight">
+                        Sales Orders
+                    </h1>
                     <p className="text-sm text-slate-500 dark:text-slate-400">
                         View and manage customer sales orders
                     </p>
-                </header>
+                </div>
+                <div>
+                    <button
+                        onClick={() => router.push("/sales-orders/create")}
+                        className="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-md shadow-sm hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition-colors"
+                    >
+                        Create
+                    </button>
+                </div>
+            </header>
 
                 <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden shadow-sm">
                     <table className="w-full text-sm">
