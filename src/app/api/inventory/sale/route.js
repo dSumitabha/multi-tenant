@@ -4,8 +4,8 @@ import { requireRole } from "@/lib/auth/requireRole";
 import { resolveTenant } from "@/lib/tenant/resolveTenant";
 import { getTenantConnection } from "@/lib/db/tenantDbConnect";
 import { getProductModel } from "@/models/Product";
-import { getStockMovementModel } from "@/models/StockMovement";
-import { getStockSnapshotModel } from "@/models/StockSnapshot";
+import { getStockMovementModel } from "@/models/StockSnapshotSchema";
+import { getStockSnapshotModel } from "@/models/StockSnapshotSchema";
 
 export async function POST(req) {
     try {
