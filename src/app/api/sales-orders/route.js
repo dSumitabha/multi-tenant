@@ -10,7 +10,7 @@ import { getSalesOrderModel } from "@/models/SalesOrder";
 export async function POST(req) {
     try {
         const { tenantId, role } = await requireAuth();
-        requireRole(role, ["owner", "manager"]);
+        requireRole(role, ["owner"]);
 
         const body = await req.json();
         const { customerName, items } = body;
