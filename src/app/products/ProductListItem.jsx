@@ -12,7 +12,7 @@ export default function ProductListItem({ product = {} }) {
     );
 
     return (
-        <div className="rounded-xl bg-zinc-900 border border-zinc-800 p-4 hover:border-zinc-700 transition">
+        <div className="rounded-xl bg-slate-900 border border-slate-800 p-4 hover:border-slate-700 transition">
             <div className="flex justify-between items-center">
                 <div>
                     <h2 className="text-lg font-medium text-white">
