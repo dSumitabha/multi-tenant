@@ -14,9 +14,15 @@ export async function GET(req) {
 
         let StockSnapshot = tenantConn.models.StockSnapshot;
         if (!StockSnapshot) {
-            const module = await import("@/models/StockSnapshot");
-            StockSnapshot = module.getStockSnapshotModel(tenantConn);
-        }
+            const { default: StockSnapshotSchema } = await import(
+                "@/models/StockSnapshotSchema"
+            );
+        
+            StockSnapshot = tenantConn.model(
+                "StockSnapshot",
+                StockSnapshotSchema
+            );
+        }        
 
         let Product = tenantConn.models.Product;
         if (!Product) {
