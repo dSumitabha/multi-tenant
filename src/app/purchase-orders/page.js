@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import NavBar from '@/components/NavBar'
 
 const NEXT_ACTION_LABEL = {
     DRAFT: "Mark as Sent",
@@ -97,6 +98,8 @@ export default function PurchaseOrdersPage() {
     }    
 
     return (
+        <>
+        <NavBar />
         <div className="p-6">
             <div className="mb-6">
                 <h1 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">
@@ -189,44 +192,44 @@ export default function PurchaseOrdersPage() {
                                 </table>
                             </div>
 
-                            {/* Footer */}
-{/* Footer */}
-<div className="flex justify-between items-center px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
-    <p className="text-sm text-slate-500 dark:text-slate-400">
-        {po.itemCount} item{po.itemCount > 1 ? "s" : ""}
-    </p>
+                            <div className="flex justify-between items-center px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
+                                <p className="text-sm text-slate-500 dark:text-slate-400">
+                                    {po.itemCount} item{po.itemCount > 1 ? "s" : ""}
+                                </p>
 
-    <div className="flex items-center gap-4">
-        <p className="text-lg font-semibold text-slate-800 dark:text-slate-100">
-            ₹{po.totalAmount}
-        </p>
+                                <div className="flex items-center gap-4">
+                                    <p className="text-lg font-semibold text-slate-800 dark:text-slate-100">
+                                        ₹{po.totalAmount}
+                                    </p>
 
-        {NEXT_ACTION_LABEL[po.status] && (
-            <button
-                onClick={() => handleNextStatus(po._id)}
-                disabled={updatingId === po._id}
-                className={`
-                    rounded-lg px-4 py-2 text-sm font-medium
-                    transition
-                    ${
-                        updatingId === po._id
-                            ? "cursor-not-allowed bg-slate-300 text-slate-600 dark:bg-slate-700 dark:text-slate-400"
-                            : "bg-slate-900 text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200"
-                    }
-                `}
-            >
-                {updatingId === po._id
-                    ? "Updating…"
-                    : NEXT_ACTION_LABEL[po.status]}
-            </button>
-        )}
-    </div>
-</div>
+                                    {NEXT_ACTION_LABEL[po.status] && (
+                                        <button
+                                            onClick={() => handleNextStatus(po._id)}
+                                            disabled={updatingId === po._id}
+                                            className={`
+                                                rounded-lg px-4 py-2 text-sm font-medium
+                                                transition
+                                                ${
+                                                    updatingId === po._id
+                                                        ? "cursor-not-allowed bg-slate-300 text-slate-600 dark:bg-slate-700 dark:text-slate-400"
+                                                        : "bg-slate-900 text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200"
+                                                }
+                                            `}
+                                        >
+                                            {updatingId === po._id
+                                                ? "Updating…"
+                                                : NEXT_ACTION_LABEL[po.status]}
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
 
                         </div>
                     ))}
                 </div>
             )}
         </div>
+        </>
     );
 }

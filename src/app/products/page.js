@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import ProductListItem from "./ProductListItem";
+import NavBar from '@/components/NavBar'
 
 export default function ProductsPage() {
     const [products, setProducts] = useState([]);
@@ -59,6 +60,8 @@ export default function ProductsPage() {
     }
 
     return (
+        <>
+        <NavBar/>
         <div className="p-6">
             <h1 className="text-2xl font-semibold text-white mb-6">
                 Products
@@ -73,5 +76,6 @@ export default function ProductsPage() {
                 ))}
             </div>
         </div>
+        </>
     );
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import NavBar from '@/components/NavBar'
 
 export default function StockMovementsPage() {
     const [movements, setMovements] = useState([]);
@@ -46,6 +47,8 @@ export default function StockMovementsPage() {
     }, []);
 
     return (
+        <>
+        <NavBar />
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-8 transition-colors">
             <header className="mb-8">
                 <h1 className="text-2xl font-bold tracking-tight">Stock Movements</h1>
@@ -119,5 +122,6 @@ export default function StockMovementsPage() {
                 </div>
             )}
         </div>
+        </>
     );
 }
