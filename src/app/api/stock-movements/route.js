@@ -15,7 +15,7 @@ export async function GET(req) {
         // Dynamic model resolution
         let StockMovement = tenantConn.models.StockMovement
         if(!StockMovement){
-            const module = await import("@/models/StockMovement");
+            const module = await import("@/models/StockMovementSchema");
             StockMovement = module.getStockMovementModel(tenantConn);
         }
 
