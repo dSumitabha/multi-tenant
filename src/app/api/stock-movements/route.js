@@ -4,8 +4,6 @@ import { requireRole } from "@/lib/auth/requireRole";
 import { resolveTenant } from "@/lib/tenant/resolveTenant";
 import { getTenantConnection } from "@/lib/db/tenantDbConnect";
 
-import StockMovementSchema from "@/models/StockMovementSchema";
-
 export async function GET(req) {
     try {
         const { tenantId, role } = await requireAuth();
