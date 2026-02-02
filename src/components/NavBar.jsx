@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useState } from "react";
 
 export default function DashboardNav() {
     const pathname = usePathname();
     const router = useRouter();
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
 
     const navItems = [
         { name: "Dashboard", href: "/" },
@@ -17,21 +19,24 @@ export default function DashboardNav() {
     ];
 
     const handleLogout = async () => {
-        try {
-            const res = await fetch("/api/auth/logout", { method: "POST" });
+        setIsLoggingOut(true);
 
-            if (!res.ok) {
+        const logoutPromise = fetch("/api/auth/logout", { method: "POST" }).then(
+            async (res) => {
                 const data = await res.json();
-                toast.error(data?.error || "Failed to logout");
-                return;
-            }
+                if (!res.ok) throw new Error(data.error || "Logout failed");
 
-            toast.success("Logged out successfully!");
-            router.push("/login");
-        } catch (err) {
-            console.error(err);
-            toast.error("Something went wrong. Try again.");
-        }
+                router.push("/login");
+                return data;
+            }
+        );
+
+        toast.promise(logoutPromise, {
+            loading: "Logging out...",
+            success: () => "Logged out successfully!",
+            error: (err) => err.message,
+            finally: () => setIsLoggingOut(false),
+        });
     };
 
     return (
@@ -54,10 +59,11 @@ export default function DashboardNav() {
             </ul>
             <div>
                 <button
-                    className="text-sm font-medium text-red-600 dark:text-red-400 hover:underline"
+                    className="px-4 py-2 border  text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-600 dark:hover:bg-red-200 focus:outline-none disabled:opacity-50"
                     onClick={handleLogout}
+                    disabled={isLoggingOut}
                 >
-                    Logout
+                    {isLoggingOut ? "Logging out..." : "Logout"}
                 </button>
             </div>
         </nav>
